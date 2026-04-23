@@ -1,0 +1,49 @@
+# C++ Build Artifacts & CMake
+build/
+bin/
+out/
+cmake-build-*/
+CMakeUserPresets.json
+.ninja_*
+
+# Compiled Executables & Libraries
+jobbie
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dylib
+*.dll
+*.exe
+
+# Qt Generated Files
+*_autogen/
+qrc_*.cpp
+moc_*.cpp
+ui_*.h
+
+# Local User Data & Backups (Personal application data)
+jobs.json
+*.tmp
+*.bak
+jobbie_backup.json
+
+# Python Caches & Virtual Environments
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+
+# IDE, OS & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.directory
+.DS_Store
