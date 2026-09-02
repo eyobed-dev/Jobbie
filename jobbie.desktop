@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Jobbie
+Comment=Job Application Tracker
+Exec=/home/eyobed/Documents/Work/Applications/Jobbie/jobbie
+Icon=/home/eyobed/Documents/Work/Applications/Jobbie/resources/icon.png
+Terminal=false
+Type=Application
+Categories=Office;ProjectManagement;Utility;
+Keywords=Job;Kanban;Tracker;CV;Resume;Pipeline;
+StartupWMClass=jobbie

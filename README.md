@@ -1,7 +1,7 @@
 # Jobbie 💼
-### Native Compiled C++ (Qt6) Kanban Job Application Tracker
+### Modern Kanban Job Application Tracker
 
-Jobbie is a fast, lightweight, and modern **native compiled C++ desktop application** built for job seekers who want a distraction-free workflow. It places the **Kanban board, your applications, and your CV folders at the center**, discarding wasteful full-page stats dashboards in favor of direct pipeline productivity.
+Jobbie is a fast, lightweight, and modern **desktop application** built for job seekers who want a distraction-free workflow. It places the **Kanban board, your applications, and your CV folders at the center**, discarding wasteful full-page stats dashboards in favor of direct pipeline productivity.
 
 ---
 
