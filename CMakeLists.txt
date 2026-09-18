@@ -8,13 +8,14 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets Svg)
 
 set(SOURCES
     src/main.cpp
     src/models.cpp
     src/storage.cpp
     src/styles.cpp
+    src/icon_helper.cpp
     src/job_card.cpp
     src/kanban_column.cpp
     src/kanban_board.cpp
@@ -29,6 +30,7 @@ set(HEADERS
     src/models.h
     src/storage.h
     src/styles.h
+    src/icon_helper.h
     src/job_card.h
     src/kanban_column.h
     src/kanban_board.h
@@ -44,7 +46,7 @@ set(RESOURCES
 
 add_executable(jobbie ${SOURCES} ${HEADERS} ${RESOURCES})
 
-target_link_libraries(jobbie PRIVATE Qt6::Widgets)
+target_link_libraries(jobbie PRIVATE Qt6::Widgets Qt6::Svg)
 
 # Place the compiled binary directly in the project root directory
 set_target_properties(jobbie PROPERTIES

@@ -6,5 +6,27 @@
         <file alias="icon_128.png">icon_128.png</file>
         <file alias="icon_64.png">icon_64.png</file>
         <file alias="icon_32.png">icon_32.png</file>
+        <file alias="award.svg">icons/award.svg</file>
+        <file alias="briefcase.svg">icons/briefcase.svg</file>
+        <file alias="building-2.svg">icons/building-2.svg</file>
+        <file alias="calendar.svg">icons/calendar.svg</file>
+        <file alias="check.svg">icons/check.svg</file>
+        <file alias="circle-x.svg">icons/circle-x.svg</file>
+        <file alias="download.svg">icons/download.svg</file>
+        <file alias="external-link.svg">icons/external-link.svg</file>
+        <file alias="folder-open.svg">icons/folder-open.svg</file>
+        <file alias="folder-plus.svg">icons/folder-plus.svg</file>
+        <file alias="folder.svg">icons/folder.svg</file>
+        <file alias="message-square.svg">icons/message-square.svg</file>
+        <file alias="moon.svg">icons/moon.svg</file>
+        <file alias="pencil.svg">icons/pencil.svg</file>
+        <file alias="plus.svg">icons/plus.svg</file>
+        <file alias="search.svg">icons/search.svg</file>
+        <file alias="send.svg">icons/send.svg</file>
+        <file alias="sun.svg">icons/sun.svg</file>
+        <file alias="target.svg">icons/target.svg</file>
+        <file alias="trash-2.svg">icons/trash-2.svg</file>
+        <file alias="triangle-alert.svg">icons/triangle-alert.svg</file>
+        <file alias="upload.svg">icons/upload.svg</file>
     </qresource>
 </RCC>
