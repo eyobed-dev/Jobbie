@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional
 
 @dataclass
 class JobApplication:
+    application_number: int = 0
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     company: str = ""
     title: str = ""
@@ -37,12 +38,23 @@ class JobApplication:
         date_applied = data.get("dateApplied") or data.get("date_applied") or datetime.now().strftime("%Y-%m-%d")
         link = data.get("link", "")
         folder_path = data.get("folder_path") or data.get("folderPath") or ""
+        if "/Documents/Work/CVs/" in folder_path:
+            folder_path = folder_path.replace("/Documents/Work/CVs/", "/Documents/Work/Applications/")
+        app_num = int(data.get("application_number") or data.get("applicationNumber") or 0)
+        if app_num <= 0 and folder_path:
+            import os, re
+            base = os.path.basename(folder_path.rstrip("/ "))
+            m = re.match(r"^(\d+)", base)
+            if m:
+                app_num = int(m.group(1))
+
         notes = data.get("notes", "")
         location = data.get("location", "Remote")
         created_at = data.get("createdAt") or data.get("created_at") or datetime.now().isoformat()
         updated_at = data.get("updatedAt") or data.get("updated_at") or datetime.now().isoformat()
 
         return cls(
+            application_number=app_num,
             id=job_id,
             company=company,
             title=title,

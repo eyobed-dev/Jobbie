@@ -1,3 +1,4 @@
+from app.icon_helper import get_icon, get_pixmap
 """Dialog for creating and editing job applications."""
 
 from typing import Optional
@@ -15,12 +16,16 @@ from app.config import STATUSES, JOB_TYPES
 
 
 class JobDialog(QDialog):
-    def __init__(self, job: Optional[JobApplication] = None, default_status: str = "Wishlist", parent=None):
+    def __init__(self, job: Optional[JobApplication] = None, default_status: str = "Wishlist", next_app_number: int = 1, parent=None):
         super().__init__(parent)
         self.job = job
         self.default_status = default_status
+        self.next_app_number = next_app_number
+        if self.job and getattr(self.job, "application_number", 0) <= 0:
+            self.job.application_number = next_app_number
 
-        title_text = "Edit Job Application" if job else "Add New Job Application"
+        app_num = self.job.application_number if self.job else next_app_number
+        title_text = f"#{app_num:02d} {self.job.company} — Jobbie" if self.job else f"New Job Application (#{app_num:02d}) — Jobbie"
         self.setWindowTitle(title_text)
         self.setMinimumWidth(560)
         self.setModal(True)
@@ -35,7 +40,9 @@ class JobDialog(QDialog):
         main_layout.setSpacing(16)
 
         # Header
-        header_title = QLabel("Edit Job Application" if self.job else "New Job Application")
+        app_num = self.job.application_number if self.job else self.next_app_number
+        header_str = f"Application #{app_num:02d}: {self.job.company} at {self.job.title}" if self.job else f"New Job Application (#{app_num:02d})"
+        header_title = QLabel(header_str)
         header_title.setObjectName("DialogHeaderTitle")
         header_title.setStyleSheet("font-size: 17px; font-weight: bold;")
         main_layout.addWidget(header_title)
@@ -121,25 +128,37 @@ class JobDialog(QDialog):
         grid.addLayout(url_layout, 7, 1)
 
         # Row 4: Dedicated CV & Application Documents Folder
-        lbl_folder = QLabel("📁 Attached CV & Application Documents Folder")
+        folder_hdr = QHBoxLayout()
+        folder_hdr.setSpacing(6)
+        f_ico = QLabel()
+        f_ico.setFixedSize(14, 14)
+        f_ico.setScaledContents(True)
+        f_ico.setPixmap(get_pixmap("folder", "#6366f1", 14))
+        folder_hdr.addWidget(f_ico)
+        lbl_folder = QLabel("Attached CV & Application Documents Folder")
         lbl_folder.setObjectName("FieldLabel")
+        folder_hdr.addWidget(lbl_folder)
+        folder_hdr.addStretch()
         folder_layout = QHBoxLayout()
         folder_layout.setSpacing(6)
 
         self.folder_input = QLineEdit()
-        self.folder_input.setPlaceholderText("/home/eyobed/Documents/Work/CVs/...")
+        app_num = self.job.application_number if self.job else self.next_app_number
+        self.folder_input.setPlaceholderText(f"/home/eyobed/Documents/Work/Applications/<location>/{app_num:02d} <company>...")
 
         browse_folder_btn = QPushButton("Browse...")
         browse_folder_btn.setToolTip("Select folder on your computer")
         browse_folder_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         browse_folder_btn.clicked.connect(self._browse_folder)
 
-        open_folder_btn = QPushButton("📂 Open")
+        open_folder_btn = QPushButton("Open")
+        open_folder_btn.setIcon(get_icon("folder-open", "#475569", 13))
         open_folder_btn.setToolTip("Open folder in file manager")
         open_folder_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         open_folder_btn.clicked.connect(self._open_folder)
 
-        create_folder_btn = QPushButton("✨ Create")
+        create_folder_btn = QPushButton("Create")
+        create_folder_btn.setIcon(get_icon("folder-plus", "#475569", 13))
         create_folder_btn.setToolTip("Create folder if it does not exist")
         create_folder_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         create_folder_btn.clicked.connect(self._create_folder)
@@ -149,7 +168,7 @@ class JobDialog(QDialog):
         folder_layout.addWidget(create_folder_btn)
         folder_layout.addWidget(open_folder_btn)
 
-        grid.addWidget(lbl_folder, 8, 0, 1, 2)
+        grid.addLayout(folder_hdr, 8, 0, 1, 2)
         grid.addLayout(folder_layout, 9, 0, 1, 2)
 
         main_layout.addLayout(grid)
@@ -194,9 +213,22 @@ class JobDialog(QDialog):
         QDesktopServices.openUrl(QUrl(url))
 
     def _browse_folder(self):
+        import os
         from app.native_dialog import get_existing_directory
         current = self.folder_input.text().strip()
-        start_dir = current if current else "/home/eyobed/Documents/Work/CVs"
+        if current:
+            start_dir = current
+        else:
+            location = self.location_input.text().strip() if hasattr(self, "location_input") else ""
+            base_dir = "/home/eyobed/Documents/Work/Applications"
+            if location and location.lower() != "remote" and os.path.isdir(f"{base_dir}/{location}"):
+                start_dir = f"{base_dir}/{location}"
+            elif os.path.isdir(base_dir):
+                start_dir = base_dir
+            else:
+                start_dir = os.path.expanduser("~")
+        if "/Documents/Work/CVs/" in start_dir:
+            start_dir = start_dir.replace("/Documents/Work/CVs/", "/Documents/Work/Applications/")
         selected = get_existing_directory(self, "Select CV & Documents Folder", start_dir)
         if selected:
             self.folder_input.setText(selected)
@@ -207,6 +239,10 @@ class JobDialog(QDialog):
         if not path:
             QMessageBox.information(self, "No Folder", "Please specify or browse for a folder location first.")
             return
+
+        if "/Documents/Work/CVs/" in path:
+            path = path.replace("/Documents/Work/CVs/", "/Documents/Work/Applications/")
+            self.folder_input.setText(path)
 
         if not os.path.exists(path):
             res = QMessageBox.question(
@@ -229,7 +265,17 @@ class JobDialog(QDialog):
             company = self.company_input.text().strip()
             if not company:
                 company = "NewApplication"
-            path = f"/home/eyobed/Documents/Work/CVs/{company}"
+            location = self.location_input.text().strip() if hasattr(self, "location_input") else ""
+            base_dir = "/home/eyobed/Documents/Work/Applications"
+            num = self.job.application_number if self.job and self.job.application_number > 0 else self.next_app_number
+            folder_name = f"{num:02d} {company}".strip()
+            if location and location.lower() != "remote":
+                path = f"{base_dir}/{location}/{folder_name}"
+            else:
+                path = f"{base_dir}/{folder_name}"
+            self.folder_input.setText(path)
+        elif "/Documents/Work/CVs/" in path:
+            path = path.replace("/Documents/Work/CVs/", "/Documents/Work/Applications/")
             self.folder_input.setText(path)
 
         if os.path.exists(path):
@@ -294,6 +340,7 @@ class JobDialog(QDialog):
             self.job.updated_at = datetime.now().isoformat()
         else:
             self.job = JobApplication(
+                application_number=self.next_app_number,
                 company=company,
                 title=title,
                 status=self.status_combo.currentText(),

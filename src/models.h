@@ -6,6 +6,7 @@
 #include <QUuid>
 
 struct JobApplication {
+    int applicationNumber = 0;
     QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
     QString company;
     QString title;

@@ -11,7 +11,7 @@ class JobDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit JobDialog(const JobApplication *job = nullptr, const QString &defaultStatus = "Wishlist", QWidget *parent = nullptr);
+    explicit JobDialog(const JobApplication *job = nullptr, const QString &defaultStatus = "Wishlist", int nextAppNumber = 1, QWidget *parent = nullptr);
 
     JobApplication getJob() const;
 

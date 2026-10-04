@@ -1,3 +1,4 @@
+#include "icon_helper.h"
 #include "job_dialog.h"
 #include "config.h"
 #include "native_dialog.h"
@@ -14,18 +15,22 @@
 #include <QDir>
 #include <QDate>
 
-JobDialog::JobDialog(const JobApplication *job, const QString &defaultStatus, QWidget *parent)
+JobDialog::JobDialog(const JobApplication *job, const QString &defaultStatus, int nextAppNumber, QWidget *parent)
     : QDialog(parent), m_defaultStatus(defaultStatus) {
     if (job) {
         m_isEdit = true;
         m_job = *job;
-        setWindowTitle("Edit Job Application");
+        if (m_job.applicationNumber <= 0) {
+            m_job.applicationNumber = nextAppNumber;
+        }
+        setWindowTitle(QString("#%1 %2 at %3 — Jobbie").arg(QString("%1").arg(m_job.applicationNumber, 2, 10, QChar('0')), m_job.company, m_job.title));
     } else {
         m_isEdit = false;
-        setWindowTitle("Add New Job Application");
+        m_job.applicationNumber = nextAppNumber;
+        setWindowTitle(QString("New Job Application (#%1) — Jobbie").arg(QString("%1").arg(nextAppNumber, 2, 10, QChar('0'))));
     }
 
-    setMinimumWidth(600);
+    setMinimumWidth(640);
     setModal(true);
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
@@ -38,7 +43,11 @@ void JobDialog::initUI() {
     mainLayout->setContentsMargins(24, 20, 24, 20);
     mainLayout->setSpacing(16);
 
-    auto *headerTitle = new QLabel(m_isEdit ? "Edit Job Application" : "New Job Application", this);
+    QString numStr = QString("%1").arg(m_job.applicationNumber, 2, 10, QChar('0'));
+    QString titleText = m_isEdit
+        ? QString("Application #%1: %2 at %3").arg(numStr, m_job.company, m_job.title)
+        : QString("New Job Application (#%1)").arg(numStr);
+    auto *headerTitle = new QLabel(titleText, this);
     headerTitle->setObjectName("DialogHeaderTitle");
     headerTitle->setStyleSheet("font-size: 17px; font-weight: bold;");
     mainLayout->addWidget(headerTitle);
@@ -109,7 +118,8 @@ void JobDialog::initUI() {
     urlLayout->setSpacing(6);
     m_linkInput = new QLineEdit(this);
     m_linkInput->setPlaceholderText("https://...");
-    auto *testUrlBtn = new QPushButton("↗ Open", this);
+    auto *testUrlBtn = new QPushButton("Open", this);
+    testUrlBtn->setIcon(IconHelper::getIcon("external-link", "#475569", 13));
     testUrlBtn->setToolTip("Open URL in browser to test");
     connect(testUrlBtn, &QPushButton::clicked, this, &JobDialog::onTestUrl);
     urlLayout->addWidget(m_linkInput);
@@ -121,25 +131,39 @@ void JobDialog::initUI() {
     grid->addLayout(urlLayout, 7, 1);
 
     // Row 4: Dedicated CV & Application Documents Folder
-    auto *lblFolder = new QLabel("📁 Attached CV & Application Documents Folder", this);
+    auto *folderHeaderLayout = new QHBoxLayout();
+    folderHeaderLayout->setSpacing(6);
+    auto *folderIconLabel = new QLabel(this);
+    folderIconLabel->setFixedSize(14, 14);
+    folderIconLabel->setScaledContents(true);
+    folderIconLabel->setPixmap(IconHelper::getPixmap("folder", "#71717a", 14));
+    folderHeaderLayout->addWidget(folderIconLabel);
+
+    auto *lblFolder = new QLabel("Attached CV & Application Documents Folder", this);
     lblFolder->setObjectName("FieldLabel");
+    folderHeaderLayout->addWidget(lblFolder);
+    folderHeaderLayout->addStretch();
+
     auto *folderLayout = new QHBoxLayout();
     folderLayout->setSpacing(6);
 
     m_folderInput = new QLineEdit(this);
-    m_folderInput->setPlaceholderText("/home/eyobed/Documents/Work/CVs/...");
+    m_folderInput->setPlaceholderText(QString("/home/eyobed/Documents/Work/Applications/<location>/%1 <company>...").arg(m_job.applicationNumber, 2, 10, QChar('0')));
 
     auto *browseFolderBtn = new QPushButton("Browse...", this);
+    browseFolderBtn->setIcon(IconHelper::getIcon("folder", "#475569", 13));
     browseFolderBtn->setToolTip("Select folder on your computer");
     browseFolderBtn->setCursor(Qt::PointingHandCursor);
     connect(browseFolderBtn, &QPushButton::clicked, this, &JobDialog::onBrowseFolder);
 
-    auto *openFolderBtn = new QPushButton("📂 Open", this);
+    auto *openFolderBtn = new QPushButton("Open", this);
+    openFolderBtn->setIcon(IconHelper::getIcon("folder-open", "#475569", 13));
     openFolderBtn->setToolTip("Open folder in file manager");
     openFolderBtn->setCursor(Qt::PointingHandCursor);
     connect(openFolderBtn, &QPushButton::clicked, this, &JobDialog::onOpenFolder);
 
-    auto *createFolderBtn = new QPushButton("✨ Create", this);
+    auto *createFolderBtn = new QPushButton("Create", this);
+    createFolderBtn->setIcon(IconHelper::getIcon("folder-plus", "#475569", 13));
     createFolderBtn->setToolTip("Create folder if it does not exist");
     createFolderBtn->setCursor(Qt::PointingHandCursor);
     connect(createFolderBtn, &QPushButton::clicked, this, &JobDialog::onCreateFolder);
@@ -149,7 +173,7 @@ void JobDialog::initUI() {
     folderLayout->addWidget(createFolderBtn);
     folderLayout->addWidget(openFolderBtn);
 
-    grid->addWidget(lblFolder, 8, 0, 1, 2);
+    grid->addLayout(folderHeaderLayout, 8, 0, 1, 2);
     grid->addLayout(folderLayout, 9, 0, 1, 2);
 
     mainLayout->addLayout(grid);
@@ -161,7 +185,7 @@ void JobDialog::initUI() {
 
     m_notesInput = new QTextEdit(this);
     m_notesInput->setPlaceholderText("Add interview feedback, recruiter contacts, technical details, follow-ups...");
-    m_notesInput->setFixedHeight(90);
+    m_notesInput->setFixedHeight(120);
     mainLayout->addWidget(m_notesInput);
 
     // Buttons
@@ -175,6 +199,7 @@ void JobDialog::initUI() {
 
     auto *saveBtn = new QPushButton(m_isEdit ? "Save Changes" : "Add to Pipeline", this);
     saveBtn->setObjectName("PrimaryButton");
+    saveBtn->setIcon(IconHelper::getIcon(m_isEdit ? "check" : "plus", "#ffffff", 13));
     saveBtn->setCursor(Qt::PointingHandCursor);
     connect(saveBtn, &QPushButton::clicked, this, &JobDialog::onSave);
 
@@ -209,7 +234,27 @@ void JobDialog::populateData() {
 
 void JobDialog::onBrowseFolder() {
     QString current = m_folderInput->text().trimmed();
-    QString startDir = current.isEmpty() ? "/home/eyobed/Documents/Work/CVs" : current;
+    QString startDir = current;
+    if (startDir.isEmpty()) {
+        QString location = m_locationInput ? m_locationInput->text().trimmed() : QString();
+        QString baseDir = "/home/eyobed/Documents/Work/Applications";
+        if (!location.isEmpty() && location.compare("Remote", Qt::CaseInsensitive) != 0) {
+            QString locDir = QString("%1/%2").arg(baseDir, location);
+            if (QDir(locDir).exists()) {
+                startDir = locDir;
+            } else if (QDir(baseDir).exists()) {
+                startDir = baseDir;
+            } else {
+                startDir = QDir::homePath();
+            }
+        } else if (QDir(baseDir).exists()) {
+            startDir = baseDir;
+        } else {
+            startDir = QDir::homePath();
+        }
+    } else if (startDir.contains("/Documents/Work/CVs/")) {
+        startDir.replace("/Documents/Work/CVs/", "/Documents/Work/Applications/");
+    }
 
     QString dir = NativeDialog::getExistingDirectory(this, "Select CV & Documents Folder", startDir);
     if (!dir.isEmpty()) {
@@ -222,6 +267,11 @@ void JobDialog::onOpenFolder() {
     if (path.isEmpty()) {
         QMessageBox::information(this, "No Folder", "Please specify or browse for a folder location first.");
         return;
+    }
+
+    if (path.contains("/Documents/Work/CVs/")) {
+        path.replace("/Documents/Work/CVs/", "/Documents/Work/Applications/");
+        m_folderInput->setText(path);
     }
 
     QDir dir(path);
@@ -252,8 +302,20 @@ void JobDialog::onCreateFolder() {
         if (company.isEmpty()) {
             company = "NewApplication";
         }
-        path = QString("/home/eyobed/Documents/Work/CVs/%1").arg(company);
+        QString location = m_locationInput ? m_locationInput->text().trimmed() : QString();
+        QString baseDir = "/home/eyobed/Documents/Work/Applications";
+        int num = m_job.applicationNumber > 0 ? m_job.applicationNumber : 1;
+        QString numPrefix = QString("%1").arg(num, 2, 10, QChar('0'));
+        QString folderName = QString("%1 %2").arg(numPrefix, company).trimmed();
+        if (!location.isEmpty() && location.compare("Remote", Qt::CaseInsensitive) != 0) {
+            path = QString("%1/%2/%3").arg(baseDir, location, folderName).trimmed();
+        } else {
+            path = QString("%1/%2").arg(baseDir, folderName).trimmed();
+        }
         m_folderInput->setText(path);
+    } else if (path.contains("/Documents/Work/CVs/")) {
+        path.replace("/Documents/Work/CVs/", "/Documents/Work/Applications/");
+        m_folderInput->setText(path.trimmed());
     }
 
     QDir dir(path);

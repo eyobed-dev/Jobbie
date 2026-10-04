@@ -3,6 +3,7 @@
 QJsonObject JobApplication::toJson() const {
     QJsonObject obj;
     obj["id"] = id;
+    obj["application_number"] = applicationNumber;
     obj["company"] = company;
     obj["title"] = title;
     obj["status"] = status;
@@ -10,7 +11,11 @@ QJsonObject JobApplication::toJson() const {
     obj["salary"] = salary;
     obj["date_applied"] = dateApplied;
     obj["link"] = link;
-    obj["folder_path"] = folderPath;
+    QString normalizedPath = folderPath;
+    if (normalizedPath.contains("/Documents/Work/CVs/")) {
+        normalizedPath.replace("/Documents/Work/CVs/", "/Documents/Work/Applications/");
+    }
+    obj["folder_path"] = normalizedPath;
     obj["notes"] = notes;
     obj["location"] = location;
     obj["created_at"] = createdAt;
@@ -32,6 +37,11 @@ JobApplication JobApplication::fromJson(const QJsonObject &obj) {
     }
 
     job.salary = obj.value("salary").toString();
+    if (obj.contains("application_number")) {
+        job.applicationNumber = obj.value("application_number").toInt();
+    } else if (obj.contains("applicationNumber")) {
+        job.applicationNumber = obj.value("applicationNumber").toInt();
+    }
 
     if (obj.contains("date_applied")) {
         job.dateApplied = obj.value("date_applied").toString();
@@ -47,10 +57,25 @@ JobApplication JobApplication::fromJson(const QJsonObject &obj) {
     } else if (obj.contains("folderPath")) {
         job.folderPath = obj.value("folderPath").toString();
     }
+    if (job.folderPath.contains("/Documents/Work/CVs/")) {
+        job.folderPath.replace("/Documents/Work/CVs/", "/Documents/Work/Applications/");
+    }
 
     job.notes = obj.value("notes").toString();
     job.location = obj.value("location").toString("Remote");
     job.createdAt = obj.value("created_at").toString(QDateTime::currentDateTime().toString(Qt::ISODate));
     job.updatedAt = obj.value("updated_at").toString(QDateTime::currentDateTime().toString(Qt::ISODate));
+
+    if (job.applicationNumber <= 0 && !job.folderPath.isEmpty()) {
+        QString folderName = job.folderPath.section('/', -1).trimmed();
+        int idx = 0;
+        while (idx < folderName.length() && folderName[idx].isDigit()) {
+            idx++;
+        }
+        if (idx > 0) {
+            job.applicationNumber = folderName.left(idx).toInt();
+        }
+    }
+
     return job;
 }
