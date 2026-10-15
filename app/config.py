@@ -1,4 +1,4 @@
-"""Configuration, constants, and color definitions for Jobbie."""
+"""Application configuration, stage metadata, and color themes."""
 
 STATUSES = ["Wishlist", "Applied", "Interviewing", "Offered", "Rejected"]
 
@@ -6,63 +6,56 @@ JOB_TYPES = ["Full-time", "Part-time", "Contract", "Freelance", "Internship"]
 
 STATUS_META = {
     "Wishlist": {
-        "icon": "🎯",
+        "icon": "target",
         "label": "Wishlist",
-        "light_color": "#6366f1",  # Indigo
-        "light_bg": "#eef2ff",
-        "light_border": "#c7d2fe",
-        "dark_color": "#818cf8",
-        "dark_bg": "#1e1b4b",
-        "dark_border": "#312e81",
+        "light_color": "#6366f1",
+        "dark_color": "#818cf8"
     },
     "Applied": {
-        "icon": "⏱️",
+        "icon": "send",
         "label": "Applied",
-        "light_color": "#0284c7",  # Sky / Blue
-        "light_bg": "#f0f9ff",
-        "light_border": "#bae6fd",
-        "dark_color": "#38bdf8",
-        "dark_bg": "#082f49",
-        "dark_border": "#0369a1",
+        "light_color": "#0284c7",
+        "dark_color": "#38bdf8"
     },
     "Interviewing": {
-        "icon": "💼",
+        "icon": "briefcase",
         "label": "Interviewing",
-        "light_color": "#d97706",  # Amber
-        "light_bg": "#fffbeb",
-        "light_border": "#fde68a",
-        "dark_color": "#fbbf24",
-        "dark_bg": "#451a03",
-        "dark_border": "#78350f",
+        "light_color": "#d97706",
+        "dark_color": "#fbbf24"
     },
     "Offered": {
-        "icon": "🎉",
+        "icon": "award",
         "label": "Offered",
-        "light_color": "#059669",  # Emerald
-        "light_bg": "#ecfdf5",
-        "light_border": "#a7f3d0",
-        "dark_color": "#34d399",
-        "dark_bg": "#064e3b",
-        "dark_border": "#047857",
+        "light_color": "#059669",
+        "dark_color": "#34d399"
     },
     "Rejected": {
-        "icon": "❌",
+        "icon": "circle-x",
         "label": "Rejected",
-        "light_color": "#e11d48",  # Rose
-        "light_bg": "#fff1f2",
-        "light_border": "#fecdd3",
-        "dark_color": "#fb7185",
-        "dark_bg": "#4c0519",
-        "dark_border": "#881337",
-    },
+        "light_color": "#e11d48",
+        "dark_color": "#fb7185"
+    }
 }
 
 TYPE_COLORS = {
-    "Full-time": {"bg_light": "#e0e7ff", "text_light": "#4338ca", "bg_dark": "#312e81", "text_dark": "#c7d2fe"},
-    "Part-time": {"bg_light": "#f3e8ff", "text_light": "#7e22ce", "bg_dark": "#581c87", "text_dark": "#e9d5ff"},
-    "Contract": {"bg_light": "#ffedd5", "text_light": "#c2410c", "bg_dark": "#7c2d12", "text_dark": "#fed7aa"},
-    "Freelance": {"bg_light": "#fce7f3", "text_light": "#be185d", "bg_dark": "#831843", "text_dark": "#fbcfe8"},
-    "Internship": {"bg_light": "#ccfbf1", "text_light": "#0f766e", "bg_dark": "#134e4a", "text_dark": "#99f6e4"},
+    "Full-time": {
+        "bg_light": "#eff6ff", "text_light": "#1d4ed8", "border_light": "#bfdbfe",
+        "bg_dark": "#172554", "text_dark": "#93c5fd", "border_dark": "#1e40af"
+    },
+    "Part-time": {
+        "bg_light": "#f5f3ff", "text_light": "#6d28d9", "border_light": "#ddd6fe",
+        "bg_dark": "#2e1065", "text_dark": "#c4b5fd", "border_dark": "#5b21b6"
+    },
+    "Contract": {
+        "bg_light": "#fffbeb", "text_light": "#b45309", "border_light": "#fde68a",
+        "bg_dark": "#451a03", "text_dark": "#fcd34d", "border_dark": "#92400e"
+    },
+    "Freelance": {
+        "bg_light": "#f0fdfa", "text_light": "#0f766e", "border_light": "#99f6e4",
+        "bg_dark": "#042f2e", "text_dark": "#5eead4", "border_dark": "#115e59"
+    },
+    "Internship": {
+        "bg_light": "#fdf4ff", "text_light": "#a21caf", "border_light": "#f5d0fe",
+        "bg_dark": "#4a044e", "text_dark": "#f0abfc", "border_dark": "#86198f"
+    }
 }
-
-DEFAULT_DATA_PATH = "jobs.json"

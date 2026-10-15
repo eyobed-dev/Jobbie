@@ -23,28 +23,30 @@ struct StatusMeta {
 
 inline QMap<QString, StatusMeta> getStatusMeta() {
     return {
-        {"Wishlist",     {"🎯", "Wishlist",     "#6366f1", "#818cf8"}},
-        {"Applied",      {"⏱️", "Applied",      "#0284c7", "#38bdf8"}},
-        {"Interviewing", {"💼", "Interviewing", "#d97706", "#fbbf24"}},
-        {"Offered",      {"🎉", "Offered",      "#059669", "#34d399"}},
-        {"Rejected",     {"❌", "Rejected",     "#e11d48", "#fb7185"}}
+        {"Wishlist",     {"target",      "Wishlist",     "#6366f1", "#818cf8"}},
+        {"Applied",      {"send",        "Applied",      "#0284c7", "#38bdf8"}},
+        {"Interviewing", {"briefcase",   "Interviewing", "#d97706", "#fbbf24"}},
+        {"Offered",      {"award",       "Offered",      "#059669", "#34d399"}},
+        {"Rejected",     {"circle-x",    "Rejected",     "#e11d48", "#fb7185"}}
     };
 }
 
 struct TypeStyle {
     QString bgLight;
     QString textLight;
+    QString borderLight;
     QString bgDark;
     QString textDark;
+    QString borderDark;
 };
 
 inline QMap<QString, TypeStyle> getTypeStyles() {
     return {
-        {"Full-time",  {"#e0e7ff", "#4338ca", "#312e81", "#c7d2fe"}},
-        {"Part-time",  {"#f3e8ff", "#7e22ce", "#581c87", "#e9d5ff"}},
-        {"Contract",   {"#ffedd5", "#c2410c", "#7c2d12", "#fed7aa"}},
-        {"Freelance",  {"#fce7f3", "#be185d", "#831843", "#fbcfe8"}},
-        {"Internship", {"#ccfbf1", "#0f766e", "#134e4a", "#99f6e4"}}
+        {"Full-time",  {"#eff6ff", "#1d4ed8", "#bfdbfe", "#172554", "#93c5fd", "#1e40af"}},
+        {"Part-time",  {"#f5f3ff", "#6d28d9", "#ddd6fe", "#2e1065", "#c4b5fd", "#5b21b6"}},
+        {"Contract",   {"#fffbeb", "#b45309", "#fde68a", "#451a03", "#fcd34d", "#92400e"}},
+        {"Freelance",  {"#f0fdfa", "#0f766e", "#99f6e4", "#042f2e", "#5eead4", "#115e59"}},
+        {"Internship", {"#fdf4ff", "#a21caf", "#f5d0fe", "#4a044e", "#f0abfc", "#86198f"}}
     };
 }
 

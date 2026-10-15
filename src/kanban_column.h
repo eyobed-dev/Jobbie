@@ -5,6 +5,7 @@
 #include <QVBoxLayout>
 #include <QScrollArea>
 #include <QList>
+class QPushButton;
 #include "models.h"
 #include "job_card.h"
 
@@ -25,6 +26,7 @@ signals:
     void deleteRequested(const QString &jobId);
 
 protected:
+    void paintEvent(QPaintEvent *event) override;
     void dragEnterEvent(QDragEnterEvent *event) override;
     void dragMoveEvent(QDragMoveEvent *event) override;
     void dragLeaveEvent(QDragLeaveEvent *event) override;
@@ -35,6 +37,9 @@ private:
 
     QString m_status;
     bool m_darkMode;
+    QFrame *m_topAccent = nullptr;
+    QLabel *m_iconLabel = nullptr;
+    QPushButton *m_addBtn = nullptr;
     QLabel *m_countBadge = nullptr;
     QScrollArea *m_scrollArea = nullptr;
     QWidget *m_cardsContainer = nullptr;

@@ -17,9 +17,12 @@ public:
 
 signals:
     void jobMoved(const QString &jobId, const QString &newStatus);
-    void addJobRequested(const QString &status);
+    void addJobRequested(const QString &defaultStatus);
     void editJobRequested(const QString &jobId);
     void deleteJobRequested(const QString &jobId);
+
+protected:
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     void initUI();

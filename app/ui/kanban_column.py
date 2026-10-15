@@ -1,3 +1,4 @@
+from app.icon_helper import get_icon, get_pixmap
 """Kanban Column widget supporting native drag-and-drop."""
 
 from typing import List
@@ -33,8 +34,18 @@ class KanbanColumnWidget(QFrame):
 
     def init_ui(self):
         main_layout = QVBoxLayout(self)
-        main_layout.setContentsMargins(6, 6, 6, 6)
-        main_layout.setSpacing(8)
+        main_layout.setContentsMargins(6, 0, 6, 6)
+        main_layout.setSpacing(6)
+
+        meta = STATUS_META.get(self.status, {})
+        status_color = meta.get("dark_color" if self.dark_mode else "light_color", "#6366f1")
+
+        self.top_accent = QFrame(self)
+        self.top_accent.setFixedHeight(3)
+        self.top_accent.setStyleSheet(
+            f"background-color: {status_color}; border-top-left-radius: 8px; border-top-right-radius: 8px; border: none;"
+        )
+        main_layout.addWidget(self.top_accent)
 
         # 1. Column Header
         header_frame = QFrame()
@@ -43,13 +54,12 @@ class KanbanColumnWidget(QFrame):
         header_layout.setContentsMargins(8, 6, 8, 8)
         header_layout.setSpacing(8)
 
-        meta = STATUS_META.get(self.status, {})
-        status_color = meta.get("dark_color" if self.dark_mode else "light_color", "#6366f1")
-
         # Status icon
-        icon_label = QLabel(meta.get("icon", "📋"))
-        icon_label.setStyleSheet("font-size: 15px;")
-        header_layout.addWidget(icon_label)
+        self.icon_label = QLabel()
+        self.icon_label.setFixedSize(16, 16)
+        self.icon_label.setScaledContents(True)
+        self.icon_label.setPixmap(get_pixmap(meta.get("icon", "target"), status_color, 16))
+        header_layout.addWidget(self.icon_label)
 
         # Title
         title_label = QLabel(self.status)
@@ -64,13 +74,11 @@ class KanbanColumnWidget(QFrame):
         header_layout.addStretch()
 
         # "+ Add" button in header
-        add_btn = QPushButton("+")
+        add_btn = QPushButton()
         add_btn.setToolTip(f"Add application to {self.status}")
         add_btn.setCursor(Qt.CursorShape.PointingHandCursor)
-        add_btn.setFixedSize(24, 24)
-        add_btn.setStyleSheet(
-            "font-size: 14px; font-weight: bold; border-radius: 12px; padding: 0px;"
-        )
+        add_btn.setFixedSize(22, 22)
+        add_btn.setIcon(get_icon("plus", "#94a3b8" if self.dark_mode else "#475569", 12))
         add_btn.clicked.connect(lambda: self.add_requested.emit(self.status))
         header_layout.addWidget(add_btn)
 
@@ -154,3 +162,14 @@ class KanbanColumnWidget(QFrame):
             self.job_dropped.emit(job_id, self.status)
         else:
             event.ignore()
+
+    def set_dark_mode(self, dark_mode: bool):
+        self.dark_mode = dark_mode
+        meta = STATUS_META.get(self.status, {})
+        status_color = meta.get("dark_color" if self.dark_mode else "light_color", "#6366f1")
+        if hasattr(self, 'top_accent') and self.top_accent:
+            self.top_accent.setStyleSheet(
+                f"background-color: {status_color}; border-top-left-radius: 8px; border-top-right-radius: 8px; border: none;"
+            )
+        if hasattr(self, 'icon_label') and self.icon_label:
+            self.icon_label.setPixmap(get_pixmap(meta.get("icon", "target"), status_color, 16))

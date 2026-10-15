@@ -3,24 +3,33 @@
 
 #include <QHBoxLayout>
 #include <QScrollArea>
+#include <QStyleOption>
+#include <QPainter>
 
 KanbanBoardWidget::KanbanBoardWidget(bool darkMode, QWidget *parent)
     : QWidget(parent), m_darkMode(darkMode) {
+    setObjectName("KanbanBoard");
+    setAttribute(Qt::WA_StyledBackground, true);
     initUI();
 }
 
 void KanbanBoardWidget::initUI() {
     auto *outerLayout = new QHBoxLayout(this);
-    outerLayout->setContentsMargins(12, 12, 12, 12);
+    outerLayout->setContentsMargins(16, 16, 16, 16);
     outerLayout->setSpacing(0);
 
     auto *scrollArea = new QScrollArea(this);
+    scrollArea->setObjectName("BoardScrollArea");
     scrollArea->setWidgetResizable(true);
     scrollArea->setFrameShape(QFrame::NoFrame);
     scrollArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     scrollArea->setHorizontalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+    scrollArea->viewport()->setAutoFillBackground(false);
 
     auto *contentWidget = new QWidget();
+    contentWidget->setObjectName("BoardContent");
+    contentWidget->setAttribute(Qt::WA_TranslucentBackground, true);
+    contentWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     auto *contentLayout = new QHBoxLayout(contentWidget);
     contentLayout->setContentsMargins(0, 0, 0, 0);
     contentLayout->setSpacing(14);
@@ -33,11 +42,19 @@ void KanbanBoardWidget::initUI() {
         connect(col, &KanbanColumnWidget::deleteRequested, this, &KanbanBoardWidget::deleteJobRequested);
 
         m_columns[status] = col;
-        contentLayout->addWidget(col);
+        contentLayout->addWidget(col, 1);
     }
 
     scrollArea->setWidget(contentWidget);
     outerLayout->addWidget(scrollArea);
+}
+
+void KanbanBoardWidget::paintEvent(QPaintEvent *event) {
+    QStyleOption opt;
+    opt.initFrom(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
+    QWidget::paintEvent(event);
 }
 
 void KanbanBoardWidget::setJobs(const QList<JobApplication> &jobs) {

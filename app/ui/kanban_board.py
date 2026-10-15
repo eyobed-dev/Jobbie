@@ -64,4 +64,4 @@ class KanbanBoardWidget(QWidget):
     def set_dark_mode(self, dark_mode: bool):
         self.dark_mode = dark_mode
         for col in self.columns.values():
-            col.dark_mode = dark_mode
+            col.set_dark_mode(dark_mode)
