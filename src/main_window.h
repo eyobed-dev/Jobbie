@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QButtonGroup>
+#include <QAction>
 #include <QList>
 
 #include "models.h"
@@ -37,6 +38,7 @@ private:
     void updateStats();
     void refreshBoard();
     QList<JobApplication> getFilteredJobs() const;
+    int getNextApplicationNumber() const;
 
     StorageManager m_storage;
     bool m_darkMode;
@@ -48,6 +50,10 @@ private:
     QLabel *m_badgeActive = nullptr;
     QLabel *m_badgeOffers = nullptr;
     QPushButton *m_themeBtn = nullptr;
+    QPushButton *m_addJobBtn = nullptr;
+    QPushButton *m_exportBtn = nullptr;
+    QPushButton *m_importBtn = nullptr;
+    QAction *m_searchAction = nullptr;
     QLineEdit *m_searchInput = nullptr;
     QButtonGroup *m_filterGroup = nullptr;
     KanbanBoardWidget *m_board = nullptr;

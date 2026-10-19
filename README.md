@@ -9,7 +9,7 @@ Jobbie is a fast, lightweight, and modern **desktop application** built for job 
 
 - **100% Native Compiled C++**: Zero web engine, zero Electron, zero Python runtime needed. Built with Qt 6.10 + C++17, starting in milliseconds and consuming minimal RAM (~30MB).
 - **Dedicated CV & Docs Folder Attachment**:
-  - Attach a local computer directory (e.g. `/home/eyobed/Documents/Work/CVs/CompanyX`) to each job application.
+  - Attach a local computer directory (e.g. `/home/eyobed/Documents/Work/Applications/<location>/<Company>`) to each job application.
   - One-click **📁** button directly on each Kanban card opens that folder in your native file manager (Nautilus, Dolphin, etc.) so you can instantly access your tailored CVs, cover letters, and notes.
   - In the Add/Edit dialog, easily **Browse**, **Open**, or **✨ Auto-create** the folder if it doesn't exist yet!
 - **Kanban-First Workflow**: Full-viewport board across 5 pipeline stages:

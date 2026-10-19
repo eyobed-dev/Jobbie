@@ -47,7 +47,7 @@ def main():
 
     storage = StorageManager(file_path=data_path)
     window = MainWindow(storage=storage, dark_mode=args.dark)
-    window.show()
+    window.showMaximized()
 
     sys.exit(app.exec())
 

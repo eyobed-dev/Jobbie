@@ -1,3 +1,4 @@
+#include "icon_helper.h"
 #include "main_window.h"
 #include "config.h"
 #include "styles.h"
@@ -16,9 +17,10 @@
 
 MainWindow::MainWindow(const StorageManager &storage, bool darkMode, QWidget *parent)
     : QMainWindow(parent), m_storage(storage), m_darkMode(darkMode) {
-    setWindowTitle("Jobbie — Native C++ Job Pipeline & Kanban");
+    setWindowTitle("Jobbie");
     resize(1340, 840);
     setMinimumSize(960, 600);
+    setWindowState(Qt::WindowMaximized);
 
     initUI();
     applyTheme();
@@ -30,6 +32,8 @@ void MainWindow::initUI() {
     setWindowIcon(QIcon(":/icons/icon.png"));
 
     auto *centralWidget = new QWidget(this);
+    centralWidget->setObjectName("CentralCanvas");
+    centralWidget->setAttribute(Qt::WA_StyledBackground, true);
     auto *mainLayout = new QVBoxLayout(centralWidget);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
@@ -50,7 +54,7 @@ void MainWindow::initUI() {
     auto *logoIconLabel = new QLabel(headerBar);
     QPixmap iconPix(":/icons/icon_64.png");
     logoIconLabel->setPixmap(iconPix);
-    logoIconLabel->setFixedSize(28, 28);
+    logoIconLabel->setFixedSize(30, 30);
     logoIconLabel->setScaledContents(true);
     logoLayout->addWidget(logoIconLabel);
 
@@ -60,14 +64,16 @@ void MainWindow::initUI() {
     topRow->addLayout(logoLayout);
 
     m_badgeTotal = new QLabel("0 Total", headerBar);
+    m_badgeTotal->setObjectName("BadgeTotal");
     m_badgeTotal->setProperty("class", "metric-badge");
 
     m_badgeActive = new QLabel("0 Active", headerBar);
+    m_badgeActive->setObjectName("BadgeActive");
     m_badgeActive->setProperty("class", "metric-badge");
 
     m_badgeOffers = new QLabel("0 Offers", headerBar);
+    m_badgeOffers->setObjectName("BadgeOffers");
     m_badgeOffers->setProperty("class", "metric-badge");
-    m_badgeOffers->setStyleSheet("color: #059669; font-weight: bold;");
 
     topRow->addWidget(m_badgeTotal);
     topRow->addWidget(m_badgeActive);
@@ -75,35 +81,39 @@ void MainWindow::initUI() {
     topRow->addStretch();
 
     // Export button
-    auto *exportBtn = new QPushButton("Backup", headerBar);
-    exportBtn->setToolTip("Export jobs to JSON (Ctrl+E)");
-    exportBtn->setCursor(Qt::PointingHandCursor);
-    connect(exportBtn, &QPushButton::clicked, this, &MainWindow::exportJobs);
-    topRow->addWidget(exportBtn);
+    m_exportBtn = new QPushButton("Backup", headerBar);
+    m_exportBtn->setToolTip("Export jobs to JSON (Ctrl+E)");
+    m_exportBtn->setCursor(Qt::PointingHandCursor);
+    m_exportBtn->setIcon(IconHelper::getIcon("download", m_darkMode ? "#a1a1aa" : "#71717a", 13));
+    connect(m_exportBtn, &QPushButton::clicked, this, &MainWindow::exportJobs);
+    topRow->addWidget(m_exportBtn);
 
     // Import button
-    auto *importBtn = new QPushButton("Import", headerBar);
-    importBtn->setToolTip("Import jobs from JSON (Ctrl+I)");
-    importBtn->setCursor(Qt::PointingHandCursor);
-    connect(importBtn, &QPushButton::clicked, this, &MainWindow::importJobs);
-    topRow->addWidget(importBtn);
+    m_importBtn = new QPushButton("Import", headerBar);
+    m_importBtn->setToolTip("Import jobs from JSON (Ctrl+I)");
+    m_importBtn->setCursor(Qt::PointingHandCursor);
+    m_importBtn->setIcon(IconHelper::getIcon("upload", m_darkMode ? "#a1a1aa" : "#71717a", 13));
+    connect(m_importBtn, &QPushButton::clicked, this, &MainWindow::importJobs);
+    topRow->addWidget(m_importBtn);
 
     // Theme toggle
-    m_themeBtn = new QPushButton(m_darkMode ? "☀️ Light" : "🌙 Dark", headerBar);
+    m_themeBtn = new QPushButton(m_darkMode ? "Light" : "Dark", headerBar);
     m_themeBtn->setToolTip("Toggle Theme (Ctrl+T)");
     m_themeBtn->setCursor(Qt::PointingHandCursor);
+    m_themeBtn->setIcon(IconHelper::getIcon(m_darkMode ? "sun" : "moon", m_darkMode ? "#fafafa" : "#09090b", 13));
     connect(m_themeBtn, &QPushButton::clicked, this, &MainWindow::toggleTheme);
     topRow->addWidget(m_themeBtn);
 
     // Add Job button
-    auto *addJobBtn = new QPushButton("+ Add Job", headerBar);
-    addJobBtn->setObjectName("PrimaryButton");
-    addJobBtn->setToolTip("Add new application (Ctrl+N)");
-    addJobBtn->setCursor(Qt::PointingHandCursor);
-    connect(addJobBtn, &QPushButton::clicked, this, [this]() {
+    m_addJobBtn = new QPushButton("Add Job", headerBar);
+    m_addJobBtn->setObjectName("PrimaryButton");
+    m_addJobBtn->setToolTip("Add new application (Ctrl+N)");
+    m_addJobBtn->setCursor(Qt::PointingHandCursor);
+    m_addJobBtn->setIcon(IconHelper::getIcon("plus", m_darkMode ? "#09090b" : "#fafafa", 13));
+    connect(m_addJobBtn, &QPushButton::clicked, this, [this]() {
         openJobDialog();
     });
-    topRow->addWidget(addJobBtn);
+    topRow->addWidget(m_addJobBtn);
 
     headerLayout->addLayout(topRow);
 
@@ -112,16 +122,17 @@ void MainWindow::initUI() {
     controlsRow->setSpacing(12);
 
     m_searchInput = new QLineEdit(headerBar);
-    m_searchInput->setPlaceholderText("🔍  Search company, role, or notes... (Ctrl+F)");
+    m_searchInput->setPlaceholderText("Search company, role, or notes... (Ctrl+F)");
     m_searchInput->setClearButtonEnabled(true);
     m_searchInput->setFixedWidth(340);
+    m_searchAction = m_searchInput->addAction(IconHelper::getIcon("search", m_darkMode ? "#71717a" : "#a1a1aa", 13), QLineEdit::LeadingPosition);
     connect(m_searchInput, &QLineEdit::textChanged, this, &MainWindow::onSearchChanged);
     controlsRow->addWidget(m_searchInput);
 
     controlsRow->addSpacing(6);
 
     auto *filterLabel = new QLabel("Filter:", headerBar);
-    filterLabel->setStyleSheet("color: #64748b; font-size: 12px; font-weight: 600;");
+    filterLabel->setStyleSheet("font-size: 9.5pt; font-weight: 600;");
     controlsRow->addWidget(filterLabel);
 
     m_filterGroup = new QButtonGroup(this);
@@ -182,7 +193,17 @@ void MainWindow::setupShortcuts() {
 void MainWindow::applyTheme() {
     setStyleSheet(Styles::getStylesheet(m_darkMode));
     m_board->setDarkMode(m_darkMode);
-    m_themeBtn->setText(m_darkMode ? "☀️ Light" : "🌙 Dark");
+    m_themeBtn->setText(m_darkMode ? "Light" : "Dark");
+    m_themeBtn->setIcon(IconHelper::getIcon(m_darkMode ? "sun" : "moon", m_darkMode ? "#fafafa" : "#09090b", 13));
+    if (m_searchAction) {
+        m_searchAction->setIcon(IconHelper::getIcon("search", m_darkMode ? "#71717a" : "#a1a1aa", 13));
+    }
+    if (m_exportBtn) {
+        m_exportBtn->setIcon(IconHelper::getIcon("download", m_darkMode ? "#a1a1aa" : "#71717a", 13));
+    }
+    if (m_importBtn) {
+        m_importBtn->setIcon(IconHelper::getIcon("upload", m_darkMode ? "#a1a1aa" : "#71717a", 13));
+    }
 }
 
 void MainWindow::toggleTheme() {
@@ -201,11 +222,25 @@ void MainWindow::saveData() {
     updateStats();
 }
 
+int MainWindow::getNextApplicationNumber() const {
+    int maxNum = 0;
+    for (const auto &j : m_jobs) {
+        if (j.applicationNumber > maxNum) {
+            maxNum = j.applicationNumber;
+        }
+    }
+    return maxNum + 1;
+}
+
 void MainWindow::updateStats() {
     int total = m_jobs.size();
     int active = 0;
     int offers = 0;
+    int maxNum = 0;
     for (const auto &j : m_jobs) {
+        if (j.applicationNumber > maxNum) {
+            maxNum = j.applicationNumber;
+        }
         if (j.status == "Applied" || j.status == "Interviewing") {
             active++;
         }
@@ -214,7 +249,9 @@ void MainWindow::updateStats() {
         }
     }
 
-    m_badgeTotal->setText(QString("%1 Total").arg(total));
+    m_badgeTotal->setText(QString("%1 Logged (#%2)").arg(total).arg(maxNum, 2, 10, QChar('0')));
+    m_badgeTotal->setToolTip(QString("Total logged applications: %1\nLatest entry counter: #%2\nNext application will be: #%3")
+        .arg(total).arg(maxNum, 2, 10, QChar('0')).arg(maxNum + 1, 2, 10, QChar('0')));
     m_badgeActive->setText(QString("%1 Active").arg(active));
     m_badgeOffers->setText(offers == 1 ? "1 Offer" : QString("%1 Offers").arg(offers));
 }
@@ -269,9 +306,14 @@ void MainWindow::onJobMoved(const QString &jobId, const QString &newStatus) {
 }
 
 void MainWindow::openJobDialog(const QString &defaultStatus) {
-    JobDialog dialog(nullptr, defaultStatus, this);
+    int nextNum = getNextApplicationNumber();
+    JobDialog dialog(nullptr, defaultStatus, nextNum, this);
     if (dialog.exec() == QDialog::Accepted) {
-        m_jobs.append(dialog.getJob());
+        JobApplication newJob = dialog.getJob();
+        if (newJob.applicationNumber <= 0) {
+            newJob.applicationNumber = nextNum;
+        }
+        m_jobs.append(newJob);
         saveData();
         refreshBoard();
     }
@@ -280,7 +322,7 @@ void MainWindow::openJobDialog(const QString &defaultStatus) {
 void MainWindow::editJobById(const QString &jobId) {
     for (int i = 0; i < m_jobs.size(); ++i) {
         if (m_jobs[i].id == jobId) {
-            JobDialog dialog(&m_jobs[i], m_jobs[i].status, this);
+            JobDialog dialog(&m_jobs[i], m_jobs[i].status, m_jobs[i].applicationNumber, this);
             if (dialog.exec() == QDialog::Accepted) {
                 m_jobs[i] = dialog.getJob();
                 saveData();

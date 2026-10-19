@@ -1,3 +1,4 @@
+#include "icon_helper.h"
 #include "confirm_dialog.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -18,8 +19,10 @@ ConfirmDialog::ConfirmDialog(const QString &title, const QString &message, QWidg
     auto *headerLayout = new QHBoxLayout();
     headerLayout->setSpacing(12);
 
-    auto *iconLabel = new QLabel("⚠️", this);
-    iconLabel->setStyleSheet("font-size: 24px;");
+    auto *iconLabel = new QLabel(this);
+    iconLabel->setFixedSize(28, 28);
+    iconLabel->setScaledContents(true);
+    iconLabel->setPixmap(IconHelper::getPixmap("triangle-alert", "#71717a", 28));
     headerLayout->addWidget(iconLabel);
 
     auto *titleLabel = new QLabel(title, this);
@@ -32,7 +35,7 @@ ConfirmDialog::ConfirmDialog(const QString &title, const QString &message, QWidg
 
     auto *msgLabel = new QLabel(message, this);
     msgLabel->setWordWrap(true);
-    msgLabel->setStyleSheet("color: #64748b; font-size: 13px; line-height: 1.4;");
+    
     layout->addWidget(msgLabel);
 
     layout->addSpacing(8);
@@ -46,6 +49,7 @@ ConfirmDialog::ConfirmDialog(const QString &title, const QString &message, QWidg
 
     auto *confirmBtn = new QPushButton("Delete", this);
     confirmBtn->setObjectName("DangerButton");
+    confirmBtn->setIcon(IconHelper::getIcon("trash-2", "#ffffff", 13));
     confirmBtn->setCursor(Qt::PointingHandCursor);
     connect(confirmBtn, &QPushButton::clicked, this, &QDialog::accept);
 

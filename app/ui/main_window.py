@@ -1,3 +1,4 @@
+from app.icon_helper import get_icon, get_pixmap
 """Main Application Window for Jobbie."""
 
 from typing import List, Optional
@@ -30,6 +31,7 @@ class MainWindow(QMainWindow):
         self.setWindowTitle("Jobbie — Native Job Pipeline & Kanban")
         self.resize(1340, 840)
         self.setMinimumSize(960, 600)
+        self.setWindowState(Qt.WindowState.WindowMaximized)
 
         self.init_ui()
         self.apply_theme()
@@ -54,19 +56,21 @@ class MainWindow(QMainWindow):
         top_row.setSpacing(16)
 
         # Brand
-        brand_label = QLabel("💼 Jobbie")
+        brand_label = QLabel("Jobbie")
         brand_label.setObjectName("AppTitle")
         top_row.addWidget(brand_label)
 
         # Compact Metric Badges (Does not waste screen space!)
         self.badge_total = QLabel("0 Total")
+        self.badge_total.setObjectName("BadgeTotal")
         self.badge_total.setProperty("class", "metric-badge")
         self.badge_active = QLabel("0 Active")
+        self.badge_active.setObjectName("BadgeActive")
         self.badge_active.setProperty("class", "metric-badge")
         self.badge_offers = QLabel("0 Offers")
+        self.badge_offers.setObjectName("BadgeOffers")
         self.badge_offers.setProperty("class", "metric-badge")
-        self.badge_offers.setStyleSheet("color: #059669; font-weight: bold;")
-
+        
         top_row.addWidget(self.badge_total)
         top_row.addWidget(self.badge_active)
         top_row.addWidget(self.badge_offers)
@@ -87,14 +91,16 @@ class MainWindow(QMainWindow):
         top_row.addWidget(import_btn)
 
         # Action: Dark / Light Theme Toggle
-        self.theme_btn = QPushButton("🌙 Dark" if not self.dark_mode else "☀️ Light")
+        self.theme_btn = QPushButton("Dark" if not self.dark_mode else "Light")
+        self.theme_btn.setIcon(get_icon("moon" if not self.dark_mode else "sun", "#09090b" if not self.dark_mode else "#fafafa", 13))
         self.theme_btn.setToolTip("Toggle Dark/Light Mode (Ctrl+T)")
         self.theme_btn.setCursor(Qt.CursorShape.PointingHandCursor)
         self.theme_btn.clicked.connect(self.toggle_theme)
         top_row.addWidget(self.theme_btn)
 
         # Action: Add Job Button (Primary)
-        add_job_btn = QPushButton("+ Add Job")
+        add_job_btn = QPushButton("Add Job")
+        add_job_btn.setIcon(get_icon("plus", "#09090b" if self.dark_mode else "#fafafa", 13))
         add_job_btn.setObjectName("PrimaryButton")
         add_job_btn.setToolTip("Add new application (Ctrl+N)")
         add_job_btn.setCursor(Qt.CursorShape.PointingHandCursor)
@@ -109,7 +115,8 @@ class MainWindow(QMainWindow):
 
         # Search Bar
         self.search_input = QLineEdit()
-        self.search_input.setPlaceholderText("🔍  Search company, role, or notes... (Ctrl+F)")
+        self.search_input.setPlaceholderText("Search company, role, or notes... (Ctrl+F)")
+        self.search_input.addAction(get_icon("search", "#71717a" if self.dark_mode else "#a1a1aa", 13), QLineEdit.ActionPosition.LeadingPosition)
         self.search_input.setClearButtonEnabled(True)
         self.search_input.textChanged.connect(self.on_search_changed)
         self.search_input.setFixedWidth(340)
@@ -183,7 +190,8 @@ class MainWindow(QMainWindow):
         stylesheet = get_stylesheet(self.dark_mode)
         self.setStyleSheet(stylesheet)
         self.board.set_dark_mode(self.dark_mode)
-        self.theme_btn.setText("☀️ Light" if self.dark_mode else "🌙 Dark")
+        self.theme_btn.setText("Light" if self.dark_mode else "Dark")
+        self.theme_btn.setIcon(get_icon("sun" if self.dark_mode else "moon", "#fafafa" if self.dark_mode else "#09090b", 13))
 
     def toggle_theme(self):
         self.dark_mode = not self.dark_mode
@@ -198,12 +206,17 @@ class MainWindow(QMainWindow):
         self.storage.save_jobs(self.jobs)
         self.update_stats()
 
+    def get_next_application_number(self) -> int:
+        return max((getattr(j, "application_number", 0) for j in self.jobs), default=0) + 1
+
     def update_stats(self):
         total = len(self.jobs)
         active = sum(1 for j in self.jobs if j.status in ["Applied", "Interviewing"])
         offers = sum(1 for j in self.jobs if j.status == "Offered")
+        max_num = max((getattr(j, "application_number", 0) for j in self.jobs), default=0)
 
-        self.badge_total.setText(f"{total} Total")
+        self.badge_total.setText(f"{total} Logged (#{max_num:02d})")
+        self.badge_total.setToolTip(f"Total logged applications: {total}\nLatest entry counter: #{max_num:02d}\nNext application will be: #{max_num + 1:02d}")
         self.badge_active.setText(f"{active} Active")
         self.badge_offers.setText(f"{offers} Offered" if offers != 1 else "1 Offer")
 
@@ -249,9 +262,12 @@ class MainWindow(QMainWindow):
                 break
 
     def open_job_dialog(self, default_status: str = "Wishlist"):
-        dialog = JobDialog(default_status=default_status, parent=self)
+        next_num = self.get_next_application_number()
+        dialog = JobDialog(default_status=default_status, next_app_number=next_num, parent=self)
         if dialog.exec():
             new_job = dialog.get_job()
+            if getattr(new_job, "application_number", 0) <= 0:
+                new_job.application_number = next_num
             self.jobs.append(new_job)
             self.save_data()
             self.refresh_board()
@@ -261,7 +277,7 @@ class MainWindow(QMainWindow):
         if not target_job:
             return
 
-        dialog = JobDialog(job=target_job, parent=self)
+        dialog = JobDialog(job=target_job, next_app_number=getattr(target_job, "application_number", 1), parent=self)
         if dialog.exec():
             self.save_data()
             self.refresh_board()

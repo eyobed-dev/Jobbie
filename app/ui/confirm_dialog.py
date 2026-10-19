@@ -1,3 +1,4 @@
+from app.icon_helper import get_icon, get_pixmap
 """Confirmation dialog for destructive actions."""
 
 from PyQt6.QtWidgets import (
@@ -22,8 +23,10 @@ class ConfirmDialog(QDialog):
         header_layout = QHBoxLayout()
         header_layout.setSpacing(12)
 
-        icon_label = QLabel("⚠️")
-        icon_label.setStyleSheet("font-size: 24px;")
+        icon_label = QLabel()
+        icon_label.setFixedSize(28, 28)
+        icon_label.setScaledContents(True)
+        icon_label.setPixmap(get_pixmap("triangle-alert", "#e11d48", 28))
         header_layout.addWidget(icon_label)
 
         title_label = QLabel(title)
@@ -51,6 +54,7 @@ class ConfirmDialog(QDialog):
         self.cancel_btn.setCursor(Qt.CursorShape.PointingHandCursor)
 
         self.confirm_btn = QPushButton("Delete")
+        confirm_btn.setIcon(get_icon("trash-2", "#ffffff", 13))
         self.confirm_btn.setObjectName("DangerButton")
         self.confirm_btn.clicked.connect(self.accept)
         self.confirm_btn.setCursor(Qt.CursorShape.PointingHandCursor)

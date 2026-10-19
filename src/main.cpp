@@ -7,18 +7,18 @@
 
 int main(int argc, char *argv[]) {
     // Enable High DPI scaling and native OS desktop portals
-    qputenv("QT_AUTO_SCREEN_SCALE_FACTOR", "1");
     qputenv("QT_USE_PORTAL", "1");
+    QGuiApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
 
     QApplication app(argc, argv);
+    app.setStyle("Fusion");
     app.setApplicationName("Jobbie");
-    app.setApplicationDisplayName("Jobbie — Native C++ Job Application Tracker");
+    app.setApplicationDisplayName("Jobbie");
     app.setOrganizationName("Jobbie");
     app.setWindowIcon(QIcon(":/icons/icon.png"));
-    app.setStyle("Fusion");
 
     QCommandLineParser parser;
-    parser.setApplicationDescription("Jobbie - Native Compiled C++ Kanban Job Tracker");
+    parser.setApplicationDescription("Jobbie — Job Application Tracker");
     parser.addHelpOption();
     parser.addVersionOption();
 
@@ -38,7 +38,7 @@ int main(int argc, char *argv[]) {
 
     StorageManager storage(dataPath);
     MainWindow window(storage, darkMode);
-    window.show();
+    window.showMaximized();
 
     return app.exec();
 }
